@@ -27,12 +27,12 @@ object Env {
             .build()
     }
 
-    fun retrofit(baseUrl: String) : Retrofit {
+    fun retrofit(baseUrl: String): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addConverterFactory(StringConverterFactory(moshi))
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
     }
