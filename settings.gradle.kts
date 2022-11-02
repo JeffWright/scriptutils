@@ -1,3 +1,3 @@
 
-rootProject.name = "scripting"
+rootProject.name = "scriptutils"
 
