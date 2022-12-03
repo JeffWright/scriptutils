@@ -18,7 +18,7 @@ fun exec(command: String): ProcessBuilder {
   val parts = parseCommandLine(command)
   val procBuilder =
       ProcessBuilder(*parts.toTypedArray())
-          .directory(File(PWD))
+          .directory(PWD)
           .redirectOutput(ProcessBuilder.Redirect.PIPE)
           .redirectError(ProcessBuilder.Redirect.PIPE)
   return (procBuilder)
@@ -82,9 +82,9 @@ operator fun String.invoke(string: String) = this().stdin(string)
 
 val `~` = HOME
 val HOME
-  get() = System.getProperty("user.home")
+  get() = File(System.getProperty("user.home"))
 val PWD
-  get() = System.getProperty("user.dir")
+  get() = File(System.getProperty("user.dir"))
 
 /* ===== STDIN ===== */
 
@@ -118,11 +118,6 @@ fun Process.stdout(file: File): Process {
   return this
 }
 
-fun Process.printStdout() {
-  stdout.forEachPrint()
-  waitFor()
-}
-
 /* ===== STDERR ===== */
 
 val Process.stderr
@@ -136,8 +131,9 @@ fun Process.stderr(file: File): Process {
   return this
 }
 
-fun Process.dump() {
-  stdout.map { "stdout> $it" }.forEachPrint()
-  stderr.map { "stderr> $it" }.forEachPrint()
+/** Print process' stdout and stderr to our stdout and stderr */
+fun Process.print() {
+  stdout.print()
+  stderr.forEach { System.err.println(it) }
   waitFor()
 }

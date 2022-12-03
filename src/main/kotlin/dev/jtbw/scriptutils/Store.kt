@@ -4,6 +4,9 @@ import com.squareup.moshi.JsonAdapter
 import dev.jtbw.scriptutils.Env.moshi
 import java.io.File
 
+/**
+ * Dead-simple file-based json data store
+ */
 class Store<T : Any>(
     private val file: File,
     private val adapter: JsonAdapter<T>,
