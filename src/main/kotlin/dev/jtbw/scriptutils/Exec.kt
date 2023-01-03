@@ -6,6 +6,10 @@ fun cd(path: String) {
   System.setProperty("user.dir", path)
 }
 
+fun cd(path: File) {
+    System.setProperty("user.dir", path.absolutePath)
+}
+
 fun pipe(vararg commands: String): Process {
   return ProcessBuilder.startPipeline(
           commands

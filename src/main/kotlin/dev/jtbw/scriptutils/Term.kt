@@ -16,7 +16,7 @@ fun <T> List<T>.choose(prompt: String, display: (T) -> String = { it.toString() 
   while (true) {
     term.print("?> ")
     val input = term.readLineOrNull(false)
-    val oneBasedIdx = input?.trim()?.toInt() ?: continue
+    val oneBasedIdx = input?.trim()?.toIntOrNull() ?: continue
     val zeroBasedIdx = oneBasedIdx - 1
     if (zeroBasedIdx !in 0..this.lastIndex) continue
     return this[zeroBasedIdx]
@@ -47,4 +47,11 @@ fun Sequence<String>.onEachPrint(): Sequence<String> {
 fun <E, T : Iterable<E>> T.print(): T {
   forEach { it.print() }
   return this
+}
+
+internal fun main() {
+  choose("Prompt", "One", "Two")
+    .also {
+      println("You chose $it")
+    }
 }
