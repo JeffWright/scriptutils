@@ -57,7 +57,7 @@ publishing {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.6.3"
+            version = "0.6.4-RC"
             artifactId = "scriptutils"
 
             from(components["java"])

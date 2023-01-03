@@ -1,6 +1,8 @@
 package dev.jtbw.scriptutils
 
 import java.io.File
+import java.lang.RuntimeException
+import kotlin.system.exitProcess
 
 fun cd(path: String) {
   System.setProperty("user.dir", path)
@@ -54,7 +56,7 @@ internal fun parseCommandLine(command: String): List<String> {
           add(command.substring(cmdIdx, pos))
           cmdIdx = pos + 1
         }
-        if (cmdIdx < command.lastIndex) {
+        if (cmdIdx <= command.lastIndex) {
           add(command.substring(cmdIdx, command.length))
         }
       }
@@ -140,4 +142,21 @@ fun Process.print() {
   stdout.print()
   stderr.forEach { System.err.println(it) }
   waitFor()
+}
+
+/** like waitFor(), but exits if the given process has a non-zero exit code */
+fun Process.waitForOk() {
+  when(val exitCode = waitFor()) {
+    0 -> return
+    else -> {
+      term.forStdErr().print("Process failed with exit code $exitCode: ")
+      RuntimeException().printStackTrace()
+      exitProcess(exitCode)
+    }
+  }
+}
+
+internal fun main() {
+  val adb = "/Users/jeffreywright/Library/Android/sdk/platform-tools/adb"
+  """$adb shell monkey -p com.wsl.noom.dev """().waitForOk()
 }

@@ -23,6 +23,25 @@ fun <T> List<T>.choose(prompt: String, display: (T) -> String = { it.toString() 
   }
 }
 
+fun yesNo(prompt: String, default: Boolean=false): Boolean {
+  while(true) {
+    term.print(prompt)
+    if (default) {
+      term.print(" [Y/n] ")
+    } else {
+      term.print(" [y/N] ")
+    }
+    val input = term.readLineOrNull(hideInput = false) ?: ""
+    if(input.isBlank()) {
+      return default
+    }
+    when(input.first().lowercase()) {
+      "y" -> return true
+      "n" -> return false
+    }
+  }
+}
+
 fun prompt(message: String): String {
   println(message)
   print("?> ")
@@ -30,7 +49,6 @@ fun prompt(message: String): String {
 }
 
 fun <T> choose(prompt: String, vararg choices: T, display: (T) -> String = { it.toString() }): T {
-  // TODO JTW: also add fancy stuff like "Yes/No" -> can type y, etc
   return choices.toList().choose(prompt, display)
 }
 
@@ -50,8 +68,9 @@ fun <E, T : Iterable<E>> T.print(): T {
 }
 
 internal fun main() {
-  choose("Prompt", "One", "Two")
-    .also {
-      println("You chose $it")
-    }
+  if(yesNo("Feeling good?", default = true)) {
+    println("Good!")
+  } else {
+    println("Bad!")
+  }
 }
