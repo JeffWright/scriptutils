@@ -7,24 +7,32 @@ class ExecTests {
   @Test
   fun `parseCommandLine handles quotes`() {
     parseCommandLine(""" echo "hello world" "from tests" """)
-        .shouldBe(listOf("echo", "hello world", "from tests"))
+      .shouldBe(listOf("echo", "hello world", "from tests"))
 
     parseCommandLine("""echo "hello world" "from tests"""")
-        .shouldBe(listOf("echo", "hello world", "from tests"))
+      .shouldBe(listOf("echo", "hello world", "from tests"))
 
     parseCommandLine("""echo "hello world"."from tests"""")
-        .shouldBe(listOf("echo", "hello world.from tests"))
+      .shouldBe(listOf("echo", "hello world.from tests"))
 
     parseCommandLine("""echo one "" "two three"""").shouldBe(listOf("echo", "one", "", "two three"))
 
     parseCommandLine("""echo one "\"" "two three"""")
-        .shouldBe(listOf("echo", "one", "\"", "two three"))
+      .shouldBe(listOf("echo", "one", "\"", "two three"))
 
     parseCommandLine("""echo one"\""two three""").shouldBe(listOf("echo", "one\"two", "three"))
 
     parseCommandLine("""echo one""").shouldBe(listOf("echo", "one"))
 
     parseCommandLine("""echo one two""").shouldBe(listOf("echo", "one", "two"))
+  }
+
+  @Test
+  fun `parseCommandLine handles final token of length 1`() {
+    val adb = "/Users/user/Library/Android/sdk/platform-tools/adb"
+    parseCommandLine(
+    """$adb shell monkey -u 1 -p com.some.package 1"""
+    ).shouldBe(listOf(adb, "shell", "monkey", "-u", "1", "-p", "com.some.package", "1" ))
   }
 
   @Test

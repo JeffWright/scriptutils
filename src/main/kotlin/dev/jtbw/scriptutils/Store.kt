@@ -1,7 +1,7 @@
 package dev.jtbw.scriptutils
 
 import com.squareup.moshi.JsonAdapter
-import dev.jtbw.scriptutils.Env.moshi
+import dev.jtbw.scriptutils.RetrofitUtils.moshi
 import java.io.File
 
 /**

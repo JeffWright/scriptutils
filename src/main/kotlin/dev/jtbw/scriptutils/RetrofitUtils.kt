@@ -6,8 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
-object Env {
+object RetrofitUtils {
   val moshi by lazy { Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build() }
 
   var retrofitLoggingInterceptor =
@@ -22,12 +23,13 @@ object Env {
     OkHttpClient.Builder().addInterceptor(retrofitLoggingInterceptor).build()
   }
 
-  fun retrofit(baseUrl: String): Retrofit {
+  fun retrofit(baseUrl: String, builderBlock:Retrofit.Builder.() -> Unit = {}): Retrofit {
     return Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(client)
-        .addConverterFactory(StringConverterFactory(moshi))
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .build()
+      .baseUrl(baseUrl)
+      .client(client)
+      .addConverterFactory(ScalarsConverterFactory.create())
+      .addConverterFactory(MoshiConverterFactory.create(moshi))
+      .apply(builderBlock)
+      .build()
   }
 }

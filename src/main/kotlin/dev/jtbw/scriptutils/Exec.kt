@@ -1,9 +1,15 @@
 package dev.jtbw.scriptutils
 
 import java.io.File
+import java.lang.RuntimeException
+import kotlin.system.exitProcess
 
 fun cd(path: String) {
   System.setProperty("user.dir", path)
+}
+
+fun cd(path: File) {
+    System.setProperty("user.dir", path.absolutePath)
 }
 
 fun pipe(vararg commands: String): Process {
@@ -50,7 +56,7 @@ internal fun parseCommandLine(command: String): List<String> {
           add(command.substring(cmdIdx, pos))
           cmdIdx = pos + 1
         }
-        if (cmdIdx < command.lastIndex) {
+        if (cmdIdx <= command.lastIndex) {
           add(command.substring(cmdIdx, command.length))
         }
       }
@@ -62,7 +68,10 @@ internal fun parseCommandLine(command: String): List<String> {
       }
 }
 
-operator fun String.invoke(): Process {
+operator fun String.invoke(printCommand: Boolean = false): Process {
+  if(printCommand) {
+    println("$> $this")
+  }
   return if (this.contains("|")) {
     pipe(*this.split("|").toTypedArray())
   } else {
@@ -132,8 +141,24 @@ fun Process.stderr(file: File): Process {
 }
 
 /** Print process' stdout and stderr to our stdout and stderr */
-fun Process.print() {
+fun Process.print(): Process {
   stdout.print()
   stderr.forEach { System.err.println(it) }
   waitFor()
+  return this
 }
+
+/** like waitFor(), but exits if the given process has a non-zero exit code */
+fun Process.waitForOk(): Process {
+  when(val exitCode = waitFor()) {
+    0 -> return this
+    else -> {
+      term.forStdErr().danger("Process failed with exit code $exitCode: ")
+      this.print()
+      RuntimeException().printStackTrace()
+      exitProcess(exitCode)
+    }
+  }
+}
+
+fun Process.exitCodeOk(): Boolean = waitFor() == 0
