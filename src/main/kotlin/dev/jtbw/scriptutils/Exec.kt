@@ -149,13 +149,18 @@ fun Process.print(): Process {
 }
 
 /** like waitFor(), but exits if the given process has a non-zero exit code */
-fun Process.waitForOk(): Process {
+fun Process.waitForOk(printStackTrace: Boolean = false): Process {
+  val cmdLine : String? = info().commandLine()
+    .let { if(it.isPresent) it.get() else null }
+
   when(val exitCode = waitFor()) {
     0 -> return this
     else -> {
-      term.forStdErr().danger("Process failed with exit code $exitCode: ")
+      term.forStdErr().danger("Command failed with exit code $exitCode: $cmdLine")
       this.print()
-      RuntimeException().printStackTrace()
+      if(printStackTrace) {
+        RuntimeException().printStackTrace()
+      }
       exitProcess(exitCode)
     }
   }
