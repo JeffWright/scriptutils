@@ -27,7 +27,6 @@ class PrimitivesJsonTests {
       }
     }
     """
-        .trimIndent()
 
     val data = deserializeJsonObjectToPrimitives(json)
     data["people"]["Alice"]["age"] shouldBe 30.0
@@ -89,5 +88,58 @@ class PrimitivesJsonTests {
       JsonEncodingException::class.java,
       runCatching { deserializeJsonObjectToPrimitives(json) }.exceptionOrNull()!!::class.java
     )
+  }
+
+  @Test
+  fun `map modification and serialization`() {
+    val json =
+      """
+    {
+      "people": {
+        "Alice": {
+          "age": 30,
+          "city": "Seattle"
+        },
+        "Bob": {
+          "age": 31,
+          "city": "Minneapolis"
+        }
+      }
+    }
+    """
+
+    val map = deserializeJsonObjectToPrimitives(json)
+
+    map["people"]["Alice"]["age"] = 99
+    serializeToJson(map) shouldBe """
+       {"people":{"Alice":{"age":99,"city":"Seattle"},"Bob":{"age":31.0,"city":"Minneapolis"}}}
+    """.trimIndent()
+  }
+
+  @Test
+  fun `list modification and serialization`() {
+    val json =
+      """
+    [
+        {
+          "age": 30,
+          "city": "Seattle"
+        },
+        {
+          "age": 31,
+          "city": "Minneapolis",
+          "friends": ["Alice"]
+        }
+    ]
+    """
+
+    val map = deserializeJsonListToPrimitives(json)
+
+    val bob = map[1]
+    bob["friends"] = bob["friends"] as List<String> + "Charlie"
+
+    serializeToJson(map) shouldBe """
+       [{"age":30.0,"city":"Seattle"},{"age":31.0,"city":"Minneapolis","friends":["Alice","Charlie"]}]
+    """.trimIndent()
   }
 }
