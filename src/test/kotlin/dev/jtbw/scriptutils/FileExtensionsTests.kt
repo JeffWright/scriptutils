@@ -8,9 +8,9 @@ class FileExtensionsTests {
   fun `file path appending`() {
     val dir = File("/home/user")
     (dir / "Downloads" / "Temp").absolutePath shouldBe
-        File("/home/user/Downloads/Temp").absolutePath
+      File("/home/user/Downloads/Temp").absolutePath
 
     ("/home/user" / "Downloads" / "Temp").absolutePath shouldBe
-        File("/home/user/Downloads/Temp").absolutePath
+      File("/home/user/Downloads/Temp").absolutePath
   }
 }

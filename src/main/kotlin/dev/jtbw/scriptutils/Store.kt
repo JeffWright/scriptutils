@@ -1,16 +1,14 @@
 package dev.jtbw.scriptutils
 
 import com.squareup.moshi.JsonAdapter
-import dev.jtbw.scriptutils.RetrofitUtils.moshi
+import dev.jtbw.scriptutils.ScriptUtils.moshi
 import java.io.File
 
-/**
- * Dead-simple file-based json data store
- */
+/** Dead-simple file-based json data store */
 class Store<T : Any>(
-    private val file: File,
-    private val adapter: JsonAdapter<T>,
-    private val default: () -> T
+  private val file: File,
+  private val adapter: JsonAdapter<T>,
+  private val default: () -> T
 ) {
 
   fun overwrite(data: T) {

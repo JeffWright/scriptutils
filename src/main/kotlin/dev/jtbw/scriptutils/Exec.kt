@@ -4,111 +4,104 @@ import java.io.File
 import java.lang.RuntimeException
 import kotlin.system.exitProcess
 
-fun cd(path: String) {
-  System.setProperty("user.dir", path)
-}
+data class ProcessDecorator(val command: String, val p: Process)
 
-fun cd(path: File) {
-    System.setProperty("user.dir", path.absolutePath)
-}
+fun Process.decorate(command: String) = ProcessDecorator(command, this)
 
-fun pipe(vararg commands: String): Process {
-  return ProcessBuilder.startPipeline(
+fun pipe(vararg commands: String): ProcessDecorator {
+  return ProcessDecorator(
+    command = commands.joinToString(" | "),
+    p =
+      ProcessBuilder.startPipeline(
           commands
-              .map { cmd -> exec(cmd) }
-              .onEach { it.redirectOutput(ProcessBuilder.Redirect.PIPE) })
-      .last()
+            .map { cmd -> exec(cmd) }
+            .onEach { it.redirectOutput(ProcessBuilder.Redirect.PIPE) }
+        )
+        .last()
+  )
 }
 
 fun exec(command: String): ProcessBuilder {
   val parts = parseCommandLine(command)
   val procBuilder =
-      ProcessBuilder(*parts.toTypedArray())
-          .directory(PWD)
-          .redirectOutput(ProcessBuilder.Redirect.PIPE)
-          .redirectError(ProcessBuilder.Redirect.PIPE)
+    ProcessBuilder(*parts.toTypedArray())
+      .directory(PWD)
+      .redirectOutput(ProcessBuilder.Redirect.PIPE)
+      .redirectError(ProcessBuilder.Redirect.PIPE)
   return (procBuilder)
 }
 
 internal fun parseCommandLine(command: String): List<String> {
   val command = command.trim()
   val positionsOfNonEnclosedSpace =
-      buildList<Int> {
-        var enclosed = false
-        var escaped = false
-        command.forEachIndexed { idx, char ->
-          if (!enclosed && (char == ' ' || char == "\t".first())) {
-            add(idx)
-          } else if (!escaped && char == '"') {
-            enclosed = !enclosed
-          }
-
-          escaped = (char == '\\')
+    buildList<Int> {
+      var enclosed = false
+      var escaped = false
+      command.forEachIndexed { idx, char ->
+        if (!enclosed && (char == ' ' || char == "\t".first())) {
+          add(idx)
+        } else if (!escaped && char == '"') {
+          enclosed = !enclosed
         }
+
+        escaped = (char == '\\')
       }
+    }
 
   val spacePositions = positionsOfNonEnclosedSpace.iterator()
   var cmdIdx = 0
   val tokens =
-      buildList<String> {
-        while (spacePositions.hasNext()) {
-          val pos = spacePositions.next()
-          add(command.substring(cmdIdx, pos))
-          cmdIdx = pos + 1
-        }
-        if (cmdIdx <= command.lastIndex) {
-          add(command.substring(cmdIdx, command.length))
-        }
+    buildList<String> {
+      while (spacePositions.hasNext()) {
+        val pos = spacePositions.next()
+        add(command.substring(cmdIdx, pos))
+        cmdIdx = pos + 1
       }
+      if (cmdIdx <= command.lastIndex) {
+        add(command.substring(cmdIdx, command.length))
+      }
+    }
   return tokens
-      .map { it.trim() }
-      .filter { it.isNotEmpty() }
-      .map {
-        it.replace("\\\"", "^^ESCAPED QUOTE^^").replace("\"", "").replace("^^ESCAPED QUOTE^^", "\"")
-      }
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .map {
+      it.replace("\\\"", "^^ESCAPED QUOTE^^").replace("\"", "").replace("^^ESCAPED QUOTE^^", "\"")
+    }
 }
 
-operator fun String.invoke(printCommand: Boolean = false): Process {
-  if(printCommand) {
+operator fun String.invoke(printCommand: Boolean = false): ProcessDecorator {
+  if (printCommand) {
     println("$> $this")
   }
   return if (this.contains("|")) {
     pipe(*this.split("|").toTypedArray())
   } else {
-    exec(this).start()
+    exec(this).start().decorate(this)
   }
 }
 
 // TODO JTW
-// operator fun String.invoke(process: Process) = this().stdin(process)
+// operator fun String.invoke(process: ProcessDecorator) = this().stdin(process)
 operator fun String.invoke(byteArray: ByteArray) = this().stdin(byteArray)
 
 operator fun String.invoke(file: File) = this().stdin(file)
 
 operator fun String.invoke(string: String) = this().stdin(string)
 
-/* ===== Directories ===== */
-
-val `~` = HOME
-val HOME
-  get() = File(System.getProperty("user.home"))
-val PWD
-  get() = File(System.getProperty("user.dir"))
-
 /* ===== STDIN ===== */
 
-val Process.stdin
-  get() = outputStream
+val ProcessDecorator.stdin
+  get() = p.outputStream
 
-fun Process.stdin(byteArray: ByteArray): Process {
+fun ProcessDecorator.stdin(byteArray: ByteArray): ProcessDecorator {
   stdin.write(byteArray)
   stdin.close()
   return this
 }
 
-fun Process.stdin(file: File) = stdin(file.readLines().joinToString("\n").toByteArray())
+fun ProcessDecorator.stdin(file: File) = stdin(file.readLines().joinToString("\n").toByteArray())
 
-fun Process.stdin(string: String): Process = stdin(string.toByteArray())
+fun ProcessDecorator.stdin(string: String): ProcessDecorator = stdin(string.toByteArray())
 
 // TODO JTW implement:
 // fun Process.stdin(process: Process): Process {
@@ -116,49 +109,57 @@ fun Process.stdin(string: String): Process = stdin(string.toByteArray())
 
 /* ===== STDOUT ===== */
 
-val Process.stdout
-  get() = inputStream.bufferedReader().lineSequence()
-val Process.stdoutString
+val ProcessDecorator.stdout: Sequence<String>
+  get() = p.inputStream.bufferedReader().lineSequence()
+val ProcessDecorator.stdoutString: String
   get() = stdout.joinToString("\n")
 
-fun Process.stdout(file: File): Process {
+fun ProcessDecorator.stdout(file: File): ProcessDecorator {
   stdout.writeTo(file)
-  waitFor()
+  p.waitFor()
   return this
 }
 
 /* ===== STDERR ===== */
 
-val Process.stderr
-  get() = errorStream.bufferedReader().lineSequence()
-val Process.stderrString
+val ProcessDecorator.stderr: Sequence<String>
+  get() = p.errorStream.bufferedReader().lineSequence()
+val ProcessDecorator.stderrString: String
   get() = stderr.joinToString("\n")
 
-fun Process.stderr(file: File): Process {
+fun ProcessDecorator.stderr(file: File): ProcessDecorator {
   stderr.writeTo(file)
-  waitFor()
+  p.waitFor()
   return this
 }
 
 /** Print process' stdout and stderr to our stdout and stderr */
-fun Process.print(): Process {
+fun ProcessDecorator.print(): ProcessDecorator {
   stdout.print()
   stderr.forEach { System.err.println(it) }
-  waitFor()
+  p.waitFor()
   return this
 }
 
-/** like waitFor(), but exits if the given process has a non-zero exit code */
-fun Process.waitForOk(printStackTrace: Boolean = false): Process {
-  val cmdLine : String? = info().commandLine()
-    .let { if(it.isPresent) it.get() else null }
+fun ProcessDecorator.waitFor(): ProcessDecorator {
+  p.waitFor()
+  return this
+}
 
-  when(val exitCode = waitFor()) {
+fun ProcessDecorator.exitValue(): Int = p.exitValue()
+
+/** like waitFor(), but exits if the given process has a non-zero exit code */
+fun ProcessDecorator.waitForOk(
+  printStackTrace: Boolean = false,
+  lazyMessage: () -> Any = { "" }
+): ProcessDecorator {
+  when (val exitCode = p.waitFor()) {
     0 -> return this
     else -> {
-      term.forStdErr().danger("Command failed with exit code $exitCode: $cmdLine")
+      term.forStdErr().danger("Command failed with exit code $exitCode: \n$> $command")
       this.print()
-      if(printStackTrace) {
+      term.forStdErr().danger(lazyMessage())
+      if (printStackTrace) {
         RuntimeException().printStackTrace()
       }
       exitProcess(exitCode)
@@ -166,4 +167,4 @@ fun Process.waitForOk(printStackTrace: Boolean = false): Process {
   }
 }
 
-fun Process.exitCodeOk(): Boolean = waitFor() == 0
+fun ProcessDecorator.success(): Boolean = p.waitFor() == 0

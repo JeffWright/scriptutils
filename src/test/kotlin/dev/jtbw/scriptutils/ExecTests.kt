@@ -30,9 +30,8 @@ class ExecTests {
   @Test
   fun `parseCommandLine handles final token of length 1`() {
     val adb = "/Users/user/Library/Android/sdk/platform-tools/adb"
-    parseCommandLine(
-    """$adb shell monkey -u 1 -p com.some.package 1"""
-    ).shouldBe(listOf(adb, "shell", "monkey", "-u", "1", "-p", "com.some.package", "1" ))
+    parseCommandLine("""$adb shell monkey -u 1 -p com.some.package 1""")
+      .shouldBe(listOf(adb, "shell", "monkey", "-u", "1", "-p", "com.some.package", "1"))
   }
 
   @Test
@@ -40,12 +39,12 @@ class ExecTests {
     "ls ."().stdout.contains("src") shouldBe true
 
     val input =
-        """
+      """
             abc
             def
             ghi
         """
-            .trimIndent()
+        .trimIndent()
 
     "cat"().stdin(input).stdoutString shouldBe input
 
@@ -85,6 +84,6 @@ class ExecTests {
   }
 }
 
-infix fun Any?.shouldBe(other: Any) {
+infix fun Any?.shouldBe(other: Any?) {
   assertEquals(other, this)
 }

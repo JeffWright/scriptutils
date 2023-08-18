@@ -26,8 +26,8 @@ fun <T> List<T>.choose(prompt: String, display: (T) -> String = { it.toString() 
   }
 }
 
-fun yesNo(prompt: String, default: Boolean=false): Boolean {
-  while(true) {
+fun yesNo(prompt: String, default: Boolean = false): Boolean {
+  while (true) {
     term.print(prompt)
     if (default) {
       term.print(" [Y/n] ")
@@ -35,10 +35,10 @@ fun yesNo(prompt: String, default: Boolean=false): Boolean {
       term.print(" [y/N] ")
     }
     val input = term.readLineOrNull(hideInput = false) ?: ""
-    if(input.isBlank()) {
+    if (input.isBlank()) {
       return default
     }
-    when(input.first().lowercase()) {
+    when (input.first().lowercase()) {
       "y" -> return true
       "n" -> return false
     }
@@ -73,9 +73,7 @@ fun <E, T : Iterable<E>> T.print(): T {
 /** Like require, but prints & exits instead of throwing */
 @OptIn(ExperimentalContracts::class)
 fun requireOrExit(value: Boolean, lazyMessage: () -> Any?) {
-  contract {
-    returns() implies value
-  }
+  contract { returns() implies value }
   if (!value) {
     val message = lazyMessage()
     term.danger(lazyMessage())
@@ -84,7 +82,7 @@ fun requireOrExit(value: Boolean, lazyMessage: () -> Any?) {
 }
 
 internal fun main() {
-  if(yesNo("Feeling good?", default = true)) {
+  if (yesNo("Feeling good?", default = true)) {
     println("Good!")
   } else {
     println("Bad!")

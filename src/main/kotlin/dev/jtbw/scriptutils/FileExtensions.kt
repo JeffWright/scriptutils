@@ -2,6 +2,22 @@ package dev.jtbw.scriptutils
 
 import java.io.File
 
+/* ===== Directories ===== */
+
+val `~` = HOME
+val HOME
+  get() = File(System.getProperty("user.home"))
+val PWD
+  get() = File(System.getProperty("user.dir"))
+
+fun cd(path: String) {
+  System.setProperty("user.dir", path)
+}
+
+fun cd(path: File) {
+  System.setProperty("user.dir", path.absolutePath)
+}
+
 /**
  * ```
  * val parentDir = File("/Users/blah/Downloads")
