@@ -134,8 +134,8 @@ fun ProcessDecorator.stderr(file: File): ProcessDecorator {
 }
 
 /** Print process' stdout and stderr to our stdout and stderr */
-fun ProcessDecorator.print(): ProcessDecorator {
-  stdout.print()
+fun ProcessDecorator.printLns(): ProcessDecorator {
+  stdout.printlns()
   stderr.forEach { System.err.println(it) }
   p.waitFor()
   return this
@@ -157,7 +157,7 @@ fun ProcessDecorator.waitForOk(
     0 -> return this
     else -> {
       term.forStdErr().danger("Command failed with exit code $exitCode: \n$> $command")
-      this.print()
+      this.println()
       term.forStdErr().danger(lazyMessage())
       if (printStackTrace) {
         RuntimeException().printStackTrace()

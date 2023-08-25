@@ -111,9 +111,11 @@ class PrimitivesJsonTests {
     val map = deserializeJsonObjectToPrimitives(json)
 
     map["people"]["Alice"]["age"] = 99
-    serializeToJson(map) shouldBe """
+    serializeToJson(map) shouldBe
+      """
        {"people":{"Alice":{"age":99,"city":"Seattle"},"Bob":{"age":31.0,"city":"Minneapolis"}}}
-    """.trimIndent()
+    """
+        .trimIndent()
   }
 
   @Test
@@ -138,8 +140,10 @@ class PrimitivesJsonTests {
     val bob = map[1]
     bob["friends"] = bob["friends"] as List<String> + "Charlie"
 
-    serializeToJson(map) shouldBe """
+    serializeToJson(map) shouldBe
+      """
        [{"age":30.0,"city":"Seattle"},{"age":31.0,"city":"Minneapolis","friends":["Alice","Charlie"]}]
-    """.trimIndent()
+    """
+        .trimIndent()
   }
 }

@@ -1,6 +1,8 @@
 package dev.jtbw.scriptutils
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /* ===== Directories ===== */
 
@@ -41,4 +43,11 @@ fun Sequence<String>.writeTo(file: File, separator: String = "\n") {
     this.forEach { id -> bufferedWriter.append(id).append(separator) }
     bufferedWriter.flush()
   }
+}
+
+fun File.copyToPreservingTimestamps(destination: File, overwrite: Boolean = false) {
+  if (!overwrite) {
+    require(!destination.exists()) { "File already exists: ${destination.absolutePath}" }
+  }
+  Files.copy(this.toPath(), destination.toPath(), StandardCopyOption.COPY_ATTRIBUTES)
 }

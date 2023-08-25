@@ -55,21 +55,6 @@ fun <T> choose(prompt: String, vararg choices: T, display: (T) -> String = { it.
   return choices.toList().choose(prompt, display)
 }
 
-fun <T : Any?> T.print(block: (T) -> Any? = { it }) = term.println(block(this)).let { this }
-
-fun Sequence<String>.print() {
-  forEach { println(it) }
-}
-
-fun Sequence<String>.onEachPrint(): Sequence<String> {
-  return onEach { println(it) }
-}
-
-fun <E, T : Iterable<E>> T.print(): T {
-  forEach { it.print() }
-  return this
-}
-
 /** Like require, but prints & exits instead of throwing */
 @OptIn(ExperimentalContracts::class)
 fun requireOrExit(value: Boolean, lazyMessage: () -> Any?) {

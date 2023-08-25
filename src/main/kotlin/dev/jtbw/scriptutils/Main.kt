@@ -10,7 +10,7 @@ internal fun processDemo() {
   "ps aux"()
     .stdout // Sequence<String>
     .filter { it.contains("intellij", ignoreCase = true) }
-    .print()
+    .printlns()
 
   // use .div on File or String to build paths
   val downloadsDir = `~` / "Downloads"
@@ -20,9 +20,9 @@ internal fun processDemo() {
   "ls $downloadsDir | grep a -"().stdout(somefile) // Write output to file
 
   // Several ways to pass stdin to commands:
-  "grep patch -"(somefile).print() // Print stdout and stderr to screen
+  "grep patch -"(somefile).println() // Print stdout and stderr to screen
   // ...or...
-  "grep patch -"().stdin(somefile).print()
+  "grep patch -"().stdin(somefile).println()
   // ...or...
   "grep patch -"()
     .apply {
@@ -32,14 +32,14 @@ internal fun processDemo() {
       stdin.writeLine("other")
       stdin.close()
     }
-    .print()
+    .println()
 
   "curl wttr.in"()
     .stdout // Sequence<String>
     .first { it.contains("°F") }
     .removeAnsiColors()
     .match(Regex("""(\d+\(\d+\))""")) // Extension for easier regex matching
-    .print { "Today's Temperature is: $it" }
+    .println { "Today's Temperature is: $it" }
 }
 
 internal fun terminalDemo() {
@@ -47,8 +47,8 @@ internal fun terminalDemo() {
   pressEnterToContinue()
 
   val month: String = listOf("Jan", "Feb", "Mar").choose("Pick a month")
-  month.print { "You chose: $it" }
+  month.println { "You chose: $it" }
 
   val text: String = prompt("Please enter some text")
-  text.print { "You entered: $it" }
+  text.println { "You entered: $it" }
 }
