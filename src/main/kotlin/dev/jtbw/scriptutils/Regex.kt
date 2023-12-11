@@ -8,3 +8,10 @@ fun String.match(regex: Regex, group: Int = 1): String {
 fun String.matchOrNull(regex: Regex, group: Int = 1): String? {
   return regex.find(this)?.groupValues?.get(group)
 }
+
+fun String.matchGroups(regex: Regex): List<String> {
+  return (regex
+    .find(this) ?: error("No match found! for Regex($regex)  -- input: $this") )
+    .groupValues
+    .drop(1)
+}

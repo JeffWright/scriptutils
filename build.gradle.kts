@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.9.21"
     id("com.ncorti.ktfmt.gradle") version "0.11.0"
     `maven-publish`
 }
@@ -63,7 +63,7 @@ publishing {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.7.2"
+            version = "0.7.4"
             artifactId = "scriptutils"
 
             from(components["java"])

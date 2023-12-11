@@ -1,6 +1,8 @@
 package dev.jtbw.scriptutils
 
-operator fun <T> List<T>.times(count: Int): List<T> {
+import dev.jtbw.scriptutils.ListSplitDelimiterOption.*
+
+operator fun <T> Iterable<T>.times(count: Int): List<T> {
   val list = this
   return buildList {
     val builder = this
@@ -8,8 +10,49 @@ operator fun <T> List<T>.times(count: Int): List<T> {
   }
 }
 
-fun main() {
-  println(listOf(1, 2, 3) * 3)
+enum class ListSplitDelimiterOption {
+  /** delimiter entries will be omitted */
+  OMIT,
+  /** delimiter entries will be included at the start of sublists */
+  PREPEND,
+  /** delimiter entries will be included at the end of sublists */
+  APPEND,
+}
+
+fun <T> Iterable<T>.split(option: ListSplitDelimiterOption = OMIT, predicate: (T) -> Boolean) : List<List<T>>{
+  val src = this
+  return buildList {
+    val iter = src.iterator()
+    var idx= 0
+    var listInProgress = mutableListOf<T>()
+    iter.forEach {
+      if(predicate(it)) {
+        when(option) {
+          OMIT -> {
+            add(listInProgress)
+            listInProgress = mutableListOf()
+          }
+          PREPEND -> {
+            add(listInProgress)
+            listInProgress = mutableListOf(it)
+          }
+          APPEND -> {
+            listInProgress.add(it)
+            add(listInProgress)
+            listInProgress = mutableListOf()
+          }
+        }
+      } else {
+        listInProgress.add(it)
+      }
+      idx++
+    }
+    add(listInProgress)
+  }
+}
+
+fun <T> listOfInitialized(count: Int, initializer: (Int) -> T) :List<T>{
+  return (0..<count).map{initializer(it)}
 }
 
 operator fun <T> List<T>.component6() = this[5]

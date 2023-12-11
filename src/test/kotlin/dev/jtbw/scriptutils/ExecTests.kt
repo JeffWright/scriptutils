@@ -1,7 +1,6 @@
 package dev.jtbw.scriptutils
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class ExecTests {
   @Test
@@ -82,8 +81,4 @@ class ExecTests {
         }
      */
   }
-}
-
-infix fun Any?.shouldBe(other: Any?) {
-  assertEquals(other, this)
 }
