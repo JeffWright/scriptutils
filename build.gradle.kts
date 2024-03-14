@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.9.21"
-    id("com.ncorti.ktfmt.gradle") version "0.11.0"
+    id("com.ncorti.ktfmt.gradle") version "0.16.0"
     `maven-publish`
 }
 
@@ -23,7 +23,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     val retrofit = "2.9.0"
-    api("com.squareup.retrofit2:retrofit:$retrofit")
+    api("com.squareup.retrofit2:retrofit:$retrofit") // TODO JTW update
     api("com.squareup.retrofit2:converter-moshi:$retrofit")
     api("com.squareup.retrofit2:converter-scalars:$retrofit")
     api("com.squareup.okhttp3:logging-interceptor:4.10.0")
@@ -63,7 +63,7 @@ publishing {
         create<MavenPublication>("maven") {
 
             groupId = "com.github.JeffWright"
-            version = "0.7.4"
+            version = "0.7.6"
             artifactId = "scriptutils"
 
             from(components["java"])

@@ -10,8 +10,13 @@ fun String.matchOrNull(regex: Regex, group: Int = 1): String? {
 }
 
 fun String.matchGroups(regex: Regex): List<String> {
-  return (regex
-    .find(this) ?: error("No match found! for Regex($regex)  -- input: $this") )
+  return (regex.find(this) ?: error("No match found! for Regex($regex)  -- input: $this"))
+    .groupValues
+    .drop(1)
+}
+
+fun String.matchGroupsOrNull(regex: Regex): List<String>? {
+  return (regex.find(this) ?: return null)
     .groupValues
     .drop(1)
 }

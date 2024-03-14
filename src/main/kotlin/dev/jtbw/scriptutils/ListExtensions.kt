@@ -19,15 +19,18 @@ enum class ListSplitDelimiterOption {
   APPEND,
 }
 
-fun <T> Iterable<T>.split(option: ListSplitDelimiterOption = OMIT, predicate: (T) -> Boolean) : List<List<T>>{
+fun <T> Iterable<T>.split(
+  option: ListSplitDelimiterOption = OMIT,
+  predicate: (T) -> Boolean
+): List<List<T>> {
   val src = this
   return buildList {
     val iter = src.iterator()
-    var idx= 0
+    var idx = 0
     var listInProgress = mutableListOf<T>()
     iter.forEach {
-      if(predicate(it)) {
-        when(option) {
+      if (predicate(it)) {
+        when (option) {
           OMIT -> {
             add(listInProgress)
             listInProgress = mutableListOf()
@@ -51,8 +54,8 @@ fun <T> Iterable<T>.split(option: ListSplitDelimiterOption = OMIT, predicate: (T
   }
 }
 
-fun <T> listOfInitialized(count: Int, initializer: (Int) -> T) :List<T>{
-  return (0..<count).map{initializer(it)}
+fun <T> listOfInitialized(count: Int, initializer: (Int) -> T): List<T> {
+  return (0 ..< count).map { initializer(it) }
 }
 
 operator fun <T> List<T>.component6() = this[5]
@@ -84,3 +87,11 @@ operator fun <T> List<T>.component18() = this[17]
 operator fun <T> List<T>.component19() = this[18]
 
 operator fun <T> List<T>.component20() = this[19]
+
+fun <T> List<T>.second(): T = this[1]
+
+fun <T> List<T>.third(): T = this[2]
+
+fun <T> List<T>.fourth(): T = this[3]
+
+fun <T> List<T>.fifth(): T = this[4]

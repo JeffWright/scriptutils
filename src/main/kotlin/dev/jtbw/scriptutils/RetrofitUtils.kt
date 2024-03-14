@@ -16,17 +16,19 @@ object RetrofitUtils {
     retrofitLoggingInterceptor.level = level
   }
 
-  private val client: OkHttpClient by lazy {
-    OkHttpClient.Builder()
-      .addInterceptor(retrofitLoggingInterceptor)
-      .callTimeout(Duration.ofDays(1))
-      .build()
-  }
+  //private val clientBuilder: OkHttpClient.Builder get() =
+  //  OkHttpClient.Builder()
+  //    .addInterceptor(retrofitLoggingInterceptor)
+  //    .callTimeout(Duration.ofDays(1))
 
-  fun retrofit(baseUrl: String, builderBlock: Retrofit.Builder.() -> Unit = {}): Retrofit {
+  fun retrofit(baseUrl: String, clientBuilder: (OkHttpClient.Builder) -> OkHttpClient.Builder = {it}, builderBlock: Retrofit.Builder.() -> Unit = {}): Retrofit {
     return Retrofit.Builder()
       .baseUrl(baseUrl)
-      .client(client)
+      .client(
+        clientBuilder(OkHttpClient.Builder())
+          .addInterceptor(retrofitLoggingInterceptor)
+          .callTimeout(Duration.ofDays(1))
+          .build())
       .addConverterFactory(ScalarsConverterFactory.create())
       .addConverterFactory(MoshiConverterFactory.create(ScriptUtils.moshi))
       .apply(builderBlock)
