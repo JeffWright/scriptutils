@@ -4,6 +4,14 @@ import java.io.File
 import java.lang.RuntimeException
 import kotlin.system.exitProcess
 
+/** The main entry point */
+operator fun String.invoke(printCommand: Boolean = false): ProcessDecorator {
+  if (printCommand) {
+    println("$> $this")
+  }
+  return exec(this).start().decorate(this)
+}
+
 data class ProcessDecorator(val command: String, val p: Process)
 
 fun Process.decorate(command: String) = ProcessDecorator(command, this)
@@ -17,20 +25,22 @@ fun pipe(vararg commands: String): ProcessDecorator {
             .map { cmd -> exec(cmd) }
             .onEach { it.redirectOutput(ProcessBuilder.Redirect.PIPE) }
         )
-        .last()
+        .last(),
   )
 }
 
 fun exec(command: String): ProcessBuilder {
-  val parts = parseCommandLine(command)
+  // val parts = parseCommandLine(command)
   val procBuilder =
-    ProcessBuilder(*parts.toTypedArray())
+    // ProcessBuilder(*parts.toTypedArray())
+    ProcessBuilder("bash", "-c", command)
       .directory(PWD)
       .redirectOutput(ProcessBuilder.Redirect.PIPE)
       .redirectError(ProcessBuilder.Redirect.PIPE)
   return (procBuilder)
 }
 
+/*
 internal fun parseCommandLine(command: String): List<String> {
   val command = command.trim()
   val positionsOfNonEnclosedSpace =
@@ -68,17 +78,7 @@ internal fun parseCommandLine(command: String): List<String> {
       it.replace("\\\"", "^^ESCAPED QUOTE^^").replace("\"", "").replace("^^ESCAPED QUOTE^^", "\"")
     }
 }
-
-operator fun String.invoke(printCommand: Boolean = false): ProcessDecorator {
-  if (printCommand) {
-    println("$> $this")
-  }
-  return if (this.contains("|")) {
-    pipe(*this.split("|").toTypedArray())
-  } else {
-    exec(this).start().decorate(this)
-  }
-}
+ */
 
 // TODO JTW
 // operator fun String.invoke(process: ProcessDecorator) = this().stdin(process)
@@ -151,7 +151,7 @@ fun ProcessDecorator.exitValue(): Int = p.exitValue()
 /** like waitFor(), but exits if the given process has a non-zero exit code */
 fun ProcessDecorator.waitForOk(
   printStackTrace: Boolean = false,
-  lazyMessage: () -> Any = { "" }
+  lazyMessage: () -> Any = { "" },
 ): ProcessDecorator {
   when (val exitCode = p.waitFor()) {
     0 -> return this

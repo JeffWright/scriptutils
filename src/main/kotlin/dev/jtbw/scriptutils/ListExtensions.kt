@@ -19,9 +19,17 @@ enum class ListSplitDelimiterOption {
   APPEND,
 }
 
+/**
+ * Like String.split
+ * <pre>
+ * listOf(1, 2, 3, 4, 5).split { it == 3 || it == 4 }
+ * returns
+ * listOf(listOf(1, 2), emptyList(), listOf(5))
+ * </pre>
+ */
 fun <T> Iterable<T>.split(
   option: ListSplitDelimiterOption = OMIT,
-  predicate: (T) -> Boolean
+  predicate: (T) -> Boolean,
 ): List<List<T>> {
   val src = this
   return buildList {
